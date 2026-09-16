@@ -1,0 +1,20 @@
+version: '3.8'
+
+services:
+  ai-nids-soc:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ai_nids_soc_v2
+    ports:
+      - "8000:8000"
+    environment:
+      - APP_ENV=production
+      - DATABASE_URL=sqlite:////app/backend/nids.db
+      - JWT_SECRET_KEY=ai-nids-soc-secret-key-2026-v2-prod-safe
+      - ANOMALY_THRESHOLD=0.55
+      - RISK_CRITICAL_THRESHOLD=85.0
+    volumes:
+      - ./backend/nids.db:/app/backend/nids.db
+      - ./models:/app/models
+    restart: unless-stopped

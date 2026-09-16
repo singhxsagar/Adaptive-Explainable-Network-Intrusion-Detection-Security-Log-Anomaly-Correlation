@@ -1,398 +1,142 @@
-# Adaptive-Explainable-Network-Intrusion-Detection-Security-Log-Anomaly-Correlation
-# AI-NIDS LAC
+# AI-NIDS SOC Platform V2
 
-
-AI-NIDS SOC V2 is a defensive cybersecurity platform designed to analyze
-network telemetry and security logs, detect anomalous behavior, classify
-potential threats, correlate security events, and present actionable
-security insights through a centralized SOC dashboard.
-
-The platform combines machine learning, behavioral analysis, anomaly
-detection, threat classification, explainable AI, risk scoring, event
-correlation, and real-time monitoring into a unified security monitoring
-environment.
+Adaptive Network Intrusion Detection & Security Log Anomaly Correlation Platform powered by FastAPI, SQLite, Dual-Ensemble ML, Explainable AI (XAI), and Real-Time WebSockets.
 
 ---
 
 ## Overview
-
-Traditional intrusion detection systems often rely heavily on predefined
-signatures and static rules. AI-NIDS SOC V2 extends this approach by
-combining machine-learning-based anomaly detection with behavioral
-correlation and contextual security analysis.
-
-The platform processes security telemetry through a multi-stage pipeline:
-
-    Telemetry Ingestion
-            ↓
-    Schema Detection
-            ↓
-    Canonical Data Normalization
-            ↓
-    Feature Engineering
-            ↓
-    Anomaly Detection
-            ↓
-    Threat Classification
-            ↓
-    Behavioral Correlation
-            ↓
-    Risk Scoring
-            ↓
-    Explainable AI (XAI)
-            ↓
-    Incident Analysis
-            ↓
-    SOC Dashboard
-
-This architecture allows the platform to analyze both individual security
-events and broader behavioral patterns.
+AI-NIDS SOC V2 is a defensive cybersecurity monitoring platform designed to analyze network flow telemetry and security log events. It combines unsupervised anomaly detection (Isolation Forest) with supervised threat classification (Random Forest), behavioral baselining, explainable risk scoring, and multi-stage event correlation.
 
 ---
 
 ## Key Features
-
-### 1. Security Telemetry Ingestion
-
-AI-NIDS SOC V2 supports structured security data ingestion from common
-formats including:
-
-- CSV
-- JSON
-- JSON Lines
-- Excel/XLSX
-- Structured TXT/LOG data
-- Security-log datasets
-- Network-flow datasets
-
-The ingestion layer performs schema identification and normalization before
-the data enters the detection pipeline.
-
----
-
-### 2. Security Log Analysis
-
-The platform analyzes structured security logs using features such as:
-
-- Event ID
-- Event level
-- Component
-- Event template
-- Message patterns
-- Event frequency
-- Temporal behavior
-- Severity indicators
-- Authentication-related activity
-- Off-hours activity
-
-This allows the system to identify unusual log behavior without treating
-every unusual record as a confirmed attack.
+1. **Multi-Mode Support**:
+   - **`DEMO` Mode**: Safe demonstration using synthetic generated security events.
+   - **`DATASET` Mode**: Ingest and analyze uploaded `.csv`, `.json`, `.xlsx`, `.txt`, and `.log` security logs. Schema validation rejects unrelated files before AI analysis.
+   - **`LIVE` Mode**: Monitor authorized local Windows Security Event Log telemetry (or supported local auth logs) with truthful sensor status and real-time WebSocket delivery.
+2. **Flexible Schema Normalization**: Automatic alias mapping (`source_ip`, `src_ip`, `Source IP` -> `src_ip`) for Network Flow and Security Log data.
+3. **Excel (.xlsx) Multi-Sheet Support**: Sheet inspection and worksheet selector for multi-sheet workbooks.
+4. **Dual Ensemble AI Architecture**:
+   - **Isolation Forest**: Detects unknown, novel anomalies.
+   - **Random Forest**: Classifies known threat categories (`DDoS-like`, `Port-scan-like`, `Brute-force-like`, `Botnet-like`, `Suspicious Activity`).
+5. **Unknown Anomaly Distinction**: Clearly distinguishes `UNKNOWN ANOMALY` from known threat classifications.
+6. **Explainable AI (XAI)**: Provides human-readable feature contribution breakdowns ("WHY WAS THIS FLAGGED?").
+7. **Multi-Stage Event Correlation Engine**: Correlates multi-stage security events into high-level incidents with visual timelines.
+8. **Dynamic Risk Engine**: Computes 0–100 risk scores with configurable severity thresholds (`LOW`, `MEDIUM`, `HIGH`, `CRITICAL`).
+9. **Real-time WebSockets**: Live event streaming to modern dark SOC dashboard UI.
+10. **Authentication & RBAC**: Role-Based Access Control (`ADMIN`, `ANALYST`, `VIEWER`) and Audit Logging.
+11. **Report Generation**: Export SOC reports in CSV and HTML formats.
+12. **Docker Ready**: Production container configuration with `Dockerfile` and `docker-compose.yml`.
 
 ---
 
-### 3. Network Flow Analysis
-
-Network telemetry can be analyzed using characteristics such as:
-
-- Source IP
-- Destination IP
-- Source port
-- Destination port
-- Protocol
-- Packet volume
-- Byte volume
-- Connection frequency
-- Connection states
-- Temporal traffic patterns
-
-These features support behavioral detection of suspicious network activity.
-
----
-
-## AI Detection Engine
-
-The detection architecture combines machine learning with behavioral
-security analysis.
-
-### Isolation Forest
-
-Isolation Forest is used for unsupervised anomaly detection.
-
-It identifies observations that differ significantly from learned behavioral
-patterns.
-
-Typical applications include:
-
-- Unusual network activity
-- Abnormal event frequency
-- Unexpected security-log behavior
-- Traffic bursts
-- Unusual connection patterns
-
----
-
-### Random Forest Classification
-
-A Random Forest classifier is used for supervised threat classification.
-
-Supported threat categories include:
-
-- NORMAL
-- DDOS
-- PORT_SCAN
-- BRUTE_FORCE
-- BOTNET
-- SUSPICIOUS_ACTIVITY
-
-Ground-truth labels, when available in datasets, are treated as evaluation
-information rather than being used directly as inference features.
+## Project Structure
+```
+AI-NIDS/
+├── backend/
+│   ├── ai/
+│   │   ├── anomaly_detector.py      # Isolation Forest anomaly detector
+│   │   ├── classifier.py            # Random Forest threat classifier
+│   │   ├── feature_engineering.py   # Network/Log feature extractor
+│   │   ├── model_manager.py         # Model persistence & metadata
+│   │   ├── baseline.py              # Behavioral baseline analyzer
+│   │   ├── explainability.py        # Explainable AI (XAI) engine
+│   │   ├── correlation_engine.py    # Multi-stage event correlation engine
+│   │   └── risk_engine.py           # Dynamic risk scoring engine
+│   ├── app/
+│   │   ├── main.py                  # FastAPI application & SOC Dashboard SPA
+│   │   ├── database.py              # SQLite database & migrations
+│   │   ├── detector_engine.py       # Detection pipeline wrapper
+│   │   ├── ingest.py                # CSV/JSON/XLSX ingestion & normalizer
+│   │   ├── schemas.py               # Canonical schemas & ALIAS_MAP
+│   │   ├── auth.py                  # JWT authentication & RBAC
+│   │   ├── audit.py                 # Audit trail logger
+│   │   ├── reports.py               # CSV/HTML report generator
+│   │   └── websocket_manager.py     # Real-time WebSocket manager
+│   ├── network/
+│   │   ├── collector.py             # Authorized local telemetry collector
+│   │   └── sensor_manager.py        # Truthful sensor state manager
+│   ├── nids.db                      # SQLite database
+│   ├── seed_demo.py                 # Safe demo database seeder
+│   └── requirements.txt             # Python dependencies
+├── sample_datasets/                 # Downloadable sample datasets (.csv, .xlsx)
+├── tests/                           # Pytest automated test suite
+├── docs/                            # Comprehensive documentation suite
+├── models/                          # Persisted model joblib files & metadata
+├── Dockerfile                       # Container definition
+├── docker-compose.yml               # Docker Compose file
+└── README.md                        # Documentation
+```
 
 ---
 
-## Behavioral Threat Detection
+## Quick Start (Windows Setup)
 
-AI-NIDS SOC V2 combines machine-learning predictions with behavioral
-correlation.
+### Prerequisites
+- Python 3.11+ (Python 3.13 recommended)
 
-### DDoS Detection
+### 1. Installation & Environment Setup
+Open PowerShell in the project directory:
+```powershell
+python -m venv .venv
+.venv\Scripts\Activate.ps1
+pip install -r backend/requirements.txt openpyxl pyjwt pytest websockets httpx
+```
 
-DDoS-like behavior can be identified using evidence such as:
+### 2. Seed Safe Demo Data
+```powershell
+python backend/seed_demo.py
+```
 
-- High traffic rates
-- High packet rates
-- High byte rates
-- Abnormally high connection frequency
-- Multiple sources targeting a destination
-- Concentrated traffic patterns
-
----
-
-### Port Scan Detection
-
-Port-scanning behavior can be identified using patterns such as:
-
-- One source contacting many destination ports
-- One source contacting multiple hosts
-- High unique destination-port counts
-- Repeated failed connections
-- Short-window probing behavior
+### 3. Launch Development Server
+```powershell
+uvicorn backend.app.main:app --reload --host 127.0.0.1 --port 8000
+```
+Open your browser at **`http://127.0.0.1:8000`**.
 
 ---
 
-### Brute Force Detection
-
-Brute-force behavior can be identified through:
-
-- Repeated authentication failures
-- Repeated attempts from the same source
-- Multiple account attempts
-- High authentication-failure frequency
-- Failure patterns concentrated within a time window
-
-Behavioral detection is based on observable telemetry rather than filenames
-or dataset names.
+## Running with Docker
+```bash
+docker-compose up -d --build
+```
+Access the application at `http://localhost:8000`.
 
 ---
 
-## Explainable AI
-
-AI-NIDS SOC V2 provides contextual explanations for security detections.
-
-Instead of displaying only:
-
-    Threat detected
-
-the platform provides supporting information based on observed features,
-behavioral patterns, anomaly scores, and event context.
-
-Example:
-
-    Repeated authentication failures were detected from the same source
-    within a short observation window.
-
-This allows security analysts to understand why an event was considered
-suspicious.
-
----
-
-## Risk Scoring
-
-Each analyzed event can receive a dynamic risk score based on available
-security evidence.
-
-Risk assessment can incorporate factors such as:
-
-- Anomaly score
-- Threat classification
-- Behavioral evidence
-- Severity
-- Correlation evidence
-- Event characteristics
-
-Risk levels are presented through the SOC dashboard to help prioritize
-security events.
-
----
-
-## Event Correlation
-
-The correlation engine groups related security events into behavioral
-patterns and potential incidents.
-
-For example:
-
-    Multiple authentication failures
-             +
-    Same source
-             +
-    Short time window
-             ↓
-    Potential Brute Force Incident
-
-This helps distinguish individual events from larger security incidents.
+## Running Tests
+Execute the pytest automated test suite:
+```powershell
+python -m pytest
+```
 
 ---
 
 ## Operating Modes
 
-AI-NIDS SOC V2 supports multiple monitoring modes.
-
 ### DEMO MODE
-
-Uses controlled synthetic security events for demonstration and UI testing.
+Generates synthetic, safe lab demonstration events to showcase SOC dashboard capabilities without accessing real networks.
 
 ### DATASET MODE
-
-Analyzes uploaded security datasets and maintains dataset-specific analysis
-results.
+Upload `.csv`, `.json`, or `.xlsx` security files. Click **Ingest Dataset** in the dashboard or use `/api/ingest`. If uploading an Excel file with multiple sheets, you can select the target worksheet.
 
 ### LIVE MODE
-
-Designed for authorized real-time telemetry sources and security monitoring.
-
-The dashboard displays the active operating mode to distinguish synthetic,
-dataset-based, and live telemetry.
+Monitors authorized local system telemetry. The sensor status explicitly displays `LIVE SENSOR: CONNECTED` or `NOT CONFIGURED`. No fake live traffic is generated.
 
 ---
 
-## Dataset Isolation
-
-Each uploaded dataset is associated with its own dataset/session context.
-
-This allows the platform to distinguish:
-
-- Current Dataset
-- Previous Datasets
-- Historical SOC Data
-- Demo Data
-
-Dataset-specific statistics can therefore be analyzed independently from
-historical security activity.
+## Security & Ethical Considerations
+- **Strictly Defensive**: This application contains **no offensive attack functionality**, exploit execution, scanning tools, or credential theft logic.
+- **Authorized Scope**: Live telemetry monitoring must only be run on networks and systems you are explicitly authorized to monitor.
+- **File Upload Security**: Uploaded files are treated strictly as data, validated for mime/extension, and saved outside executable paths.
 
 ---
 
-## SOC Dashboard
-
-The platform provides a centralized SOC interface containing sections
-for:
-
-- Overview
-- Live Monitor
-- Network Flows
-- Security Logs
-- Threats
-- Incidents
-- AI Analysis & XAI
-- Datasets
-- Reports
-- Settings & Audit
-
-### Overview
-
-The Overview dashboard provides high-level visibility into:
-
-- Total Events
-- Anomalies
-- Critical Alerts
-- Network Flows
-- Security Logs
-- Threat Distribution
-- Recent Security Events
-- Detection Pipeline
-
----
-
-## Technology Stack
-
-### Backend
-
-- Python
-- FastAPI
-- Uvicorn
-- SQLite
-- Pandas
-- Scikit-learn
-- PyJWT
-- OpenPyXL
-
-### Machine Learning
-
-- Scikit-learn
-- Isolation Forest
-- Random Forest
-- Feature Engineering
-- Behavioral Analysis
-
-### Communication
-
-- REST APIs
-- WebSockets
-
-### Frontend
-
-- HTML
-- CSS
-- JavaScript
-- SOC dashboard interface
-
----
-
-## Project Structure
-
-```text
-AI-NIDS-V2-fixed/
-│
-├── backend/
-│   │
-│   ├── app/
-│   │   ├── main.py
-│   │   ├── auth.py
-│   │   ├── database.py
-│   │   ├── ingest.py
-│   │   └── schemas.py
-│   │
-│   ├── ai/
-│   │   ├── feature_engineering.py
-│   │   ├── anomaly_detector.py
-│   │   ├── risk_engine.py
-│   │   ├── explainability.py
-│   │   └── behavior_engine.py
-│   │
-│   ├── ml/
-│   ├── network/
-│   ├── data/
-│   ├── nids.db
-│   ├── requirements.txt
-│   ├── sample_logs.csv
-│   └── seed_demo.py
-│
-├── backend_v1_backup/
-│
-├── tests/
-│   ├── test_ai.py
-│   ├── test_api.py
-│   ├── test_correlation.py
-│   ├── test_ingest.py
-│   └── test_v2_validation.py
-│
-└── README.md
+## Documentation
+See the `docs/` folder for detailed guides:
+- `docs/architecture.md`: System topology & module structure
+- `docs/ai-pipeline.md`: AI detection & correlation pipeline
+- `docs/dataset-format.md`: Supported column schemas & aliases
+- `docs/api.md`: Complete REST & WebSocket API specification
+- `docs/deployment.md`: Detailed deployment procedures
+- `docs/research.md`: Defensive methodology & research objectives
